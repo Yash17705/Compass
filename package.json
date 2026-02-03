@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-    "scripts": {
+  "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon app.js"
   },
@@ -14,7 +14,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
+  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/Yash17705/Compass/issues"
   },
@@ -22,6 +22,7 @@
   "dependencies": {
     "ejs": "^4.0.1",
     "express": "^5.2.1",
+    "method-override": "^3.0.0",
     "mongoose": "^9.1.5"
   },
   "devDependencies": {
