@@ -22,7 +22,7 @@
         <label for="image" class="form-label">Image</label>
         <input
           name="listing[image]"
-          value="<%=listing.image%>"
+          value="<%= listing.image && listing.image.url ? listing.image.url : '' %>"
           type="text"
           class="form-control"
         />
