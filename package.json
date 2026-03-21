@@ -1,7 +1,7 @@
 {
   "name": "compass",
   "version": "1.0.0",
-  "description": "",
+  "description": "Compass is a full-stack travel listing web app for exploring, creating, and reviewing stay listings across destinations.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
