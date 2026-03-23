@@ -6,11 +6,11 @@ const ExpressError=require("../utils/ExpressErrors.js")
 const Listing = require("../models/listing.js");
 
 const validateListing=(req,res,next)=>{
-  let error= listingSchema.validate(req.body);
+  let { error } = listingSchema.validate(req.body);
   
   if(error){
     let errMsg=error.details.map((el)=>el.message).join(",");
-    throw new ExpressError(404,errMsg);
+    throw new ExpressError(400,errMsg);
   }else{
     next();
   }
@@ -27,6 +27,10 @@ router.get("/new",(req,res)=>{
 router.get("/:id",wrapAsync(async(req,res)=>{
   let {id}=req.params
   const listing=await Listing.findById(id).populate("reviews")
+  if(!listing){
+    req.flash("error"," Listing does not exist")
+    res.redirect("/listings")
+  }
   res.render("listings/show.ejs",{listing})
 }))
 
@@ -36,11 +40,14 @@ router.post("/",validateListing,wrapAsync(async(req,res,next)=>{
   
   const imageUrl = req.body.listing.image?.trim();
   delete newListingData.image;
-  newListingData.image = {
-    url: imageUrl || DEFAULT_IMAGE_URL,
-  };
+  if (imageUrl) {
+    newListingData.image = {
+      url: imageUrl,
+    };
+  }
   const newlisting = new Listing(newListingData);
   await newlisting.save();
+  req.flash("success","New Listing Created")
   res.redirect("/listings");
   })
 );
@@ -49,8 +56,14 @@ router.post("/",validateListing,wrapAsync(async(req,res,next)=>{
 router.get("/:id/edit",wrapAsync(async(req,res)=>{
   let {id}=req.params
   const listing=await Listing.findById(id)
+  if(!listing){
+    req.flash("error"," Listing does not exist")
+    res.redirect("/listings")
+  }
   res.render("listings/edit.ejs",{listing})
 }))
+
+//Update route
 
 router.put("/:id",validateListing,wrapAsync(async(req,res)=>{
   let {id}=req.params
@@ -64,13 +77,15 @@ router.put("/:id",validateListing,wrapAsync(async(req,res)=>{
     };
   }
   await Listing.findByIdAndUpdate(id, updatedListingData)
+    req.flash("success","Listing Updated")
     res.redirect(`/listings/${id}`)
   })
 )
 router.delete("/:id",wrapAsync(async(req,res)=>{
   let {id}=req.params
   let deletedListing= await Listing.findByIdAndDelete(id)
-  console.log("delelte listing")
+  console.log("deletedListing")
+  req.flash("success","Listing Deleted")
   res.redirect("/listings")
 
 }))
