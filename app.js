@@ -1,3 +1,8 @@
+if(process.env.NODE_ENV!="production"){
+  require('dotenv').config()
+}
+  
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -65,6 +70,7 @@ passport.deserializeUser(User.deserializeUser())
 app.use((req,res,next)=>{
   res.locals.success=req.flash("success")
   res.locals.error=req.flash("error")
+  res.locals.currUser= req.user;
   next();
 })
 app.get("/demouser",async(req,res)=>{
@@ -88,6 +94,7 @@ app.use((err,req,res,next)=>{
   if (res.headersSent) {
     return next(err);
   }
+  console.error(err);
   let {statusCode=500,message="Something went wrong"}=err;
   res.status(statusCode).render("error.ejs",{message})
   // res.status(statusCode).send(message);
