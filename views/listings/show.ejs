@@ -11,7 +11,7 @@
     />
     <div class="card-body">
       <p class="card-text">
-        Owned by <i><%=listing.owner.username%></i>
+        Owned by <i><%= listing.owner?.username || "Unknown host" %></i>
       </p>
 
       <p class="card-text"><%=listing.description%></p>
@@ -44,7 +44,7 @@
   </div>
   <% } %>
   <br />
-  <% if(currUser&&currUser._id.equals(listing.owner._id)){%>
+  <% if (currUser && listing.owner && currUser._id.equals(listing.owner._id)) { %>
   <div class="btns">
     <a
       href="/listings/<%=listing._id%>/edit"
