@@ -6,6 +6,8 @@
       method="POST"
       action="/listings/<%=listing._id%>?_method=put"
       enctype="multipart/form-data"
+      class="needs-validation"
+      novalidate
     >
       <div class="mb-3">
         <label for="title" class="form-label">Title</label>
@@ -14,17 +16,36 @@
           value="<%=listing.title%>"
           type="text"
           class="form-control"
+          required
         />
+        <div class="invalid-feedback">Please enter a title.</div>
       </div>
       <div class="mb-3">
         <label for="description" class="form-label">Description</label>
-        <textarea name="listing[description]" class="form-control">
+        <textarea name="listing[description]" class="form-control" required>
 <%= listing.description %></textarea
         >
+        <div class="invalid-feedback">Please add a description.</div>
       </div>
       <div class="mb-3">
-        <label for="image" class="form-label">Image</label>
-        <input name="image" type="file" accept="image/*" class="form-control" />
+        Original Listing Image<br />
+        <img
+          src="<%= listing.image && listing.image.url ? listing.image.url : 'https://via.placeholder.com/300' %>"
+          alt="Current listing image"
+          class="edit-preview-img img-thumbnail"
+          id="editImagePreview"
+        />
+      </div>
+      <div class="mb-3">
+        <label for="image" class="form-label">Upload New Image</label>
+        <input
+          id="editImageInput"
+          name="image"
+          type="file"
+          accept="image/*"
+          class="form-control"
+        />
+        <div class="invalid-feedback">Please upload a valid image.</div>
       </div>
       <div class="row">
         <div class="mb-3 col-md-4">
@@ -34,26 +55,54 @@
             value="<%=listing.price%>"
             type="number"
             class="form-control"
+            required
           />
+          <div class="invalid-feedback">Please enter a valid price.</div>
         </div>
         <div class="mb-3 col-md-8">
           <label for="country" class="form-label">Country</label>
           <input
+            id="country"
             name="listing[country]"
             value="<%=listing.country%>"
             type="text"
             class="form-control"
+            required
           />
+          <div class="invalid-feedback">Please enter a country.</div>
         </div>
       </div>
       <div class="mb-3">
         <label for="location" class="form-label">Location</label>
         <input
+          id="location"
           name="listing[location]"
           value="<%= listing.location %>"
           type="text"
           class="form-control"
+          required
         />
+        <div class="invalid-feedback">Please enter a location.</div>
+      </div>
+      <div class="mb-3">
+        <button
+          type="button"
+          class="btn btn-outline-dark location-check-btn"
+          data-map-target="listing-form-map"
+          data-location-input="location"
+          data-country-input="country"
+          data-initial-lng="<%= listing.geometry?.coordinates?.[0] ?? '' %>"
+          data-initial-lat="<%= listing.geometry?.coordinates?.[1] ?? '' %>"
+          data-initial-label="<%= `${listing.location}, ${listing.country}` %>"
+        >
+          Check location
+        </button>
+      </div>
+      <div class="mb-3">
+        <div id="listing-form-map" class="listing-map <%= listing.geometry?.coordinates?.length === 2 ? '' : 'd-none' %>"></div>
+        <p id="listing-form-map-status" class="location-status text-muted mt-2 mb-0">
+          <%= listing.geometry?.coordinates?.length === 2 ? `${listing.location}, ${listing.country}` : '' %>
+        </p>
       </div>
       <button class="btn btn-dark edit-btn mt-3">Edit</button>
       <br /><br />

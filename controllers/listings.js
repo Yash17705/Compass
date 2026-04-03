@@ -1,5 +1,44 @@
 const Listing = require("../models/listing");
 const { cloudinary } = require("../cloudConfig.js");
+const ExpressError = require("../utils/ExpressErrors.js");
+
+const geocodeListingLocation = async (location, country) => {
+  const query = [location, country].filter(Boolean).join(", ");
+  const searchParams = new URLSearchParams({
+    q: query,
+    format: "jsonv2",
+    limit: "1",
+  });
+
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/search?${searchParams.toString()}`,
+    {
+      headers: {
+        "User-Agent": "Compass/1.0 (listing geocoder)",
+        Accept: "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new ExpressError(502, "OpenStreetMap geocoding request failed.");
+  }
+
+  const results = await response.json();
+  const match = results[0];
+
+  if (!match) {
+    throw new ExpressError(
+      400,
+      "Unable to find coordinates for that location. Try a more specific place."
+    );
+  }
+
+  return {
+    type: "Point",
+    coordinates: [Number(match.lon), Number(match.lat)],
+  };
+};
 
 module.exports.index = async (req, res) => {
   const allListings = await Listing.find({});
@@ -37,6 +76,10 @@ module.exports.createListing = async (req, res) => {
 
   const newListingData = { ...req.body.listing };
   delete newListingData.image;
+  newListingData.geometry = await geocodeListingLocation(
+    newListingData.location,
+    newListingData.country
+  );
   if (req.file) {
     newListingData.image = {
       url: req.file.path,
@@ -59,8 +102,10 @@ module.exports.renderEditForm = async (req, res) => {
     req.flash("error", " Listing does not exist");
     return res.redirect("/listings");
   }
-
-  res.render("listings/edit.ejs", { listing });
+  let originalImageUrl= listing.image.url
+  originalImageUrl.replace("/upload","/upload/h_300,w_250")
+  
+  res.render("listings/edit.ejs", { listing,originalImageUrl });
 };
 
 module.exports.updateListing = async (req, res) => {
@@ -78,6 +123,15 @@ module.exports.updateListing = async (req, res) => {
 
   const updatedListingData = { ...req.body.listing };
   delete updatedListingData.image;
+  const locationChanged =
+    updatedListingData.location !== existingListing.location ||
+    updatedListingData.country !== existingListing.country;
+  if (locationChanged) {
+    updatedListingData.geometry = await geocodeListingLocation(
+      updatedListingData.location,
+      updatedListingData.country
+    );
+  }
   let oldImageFilename = null;
   if (req.file) {
     if (existingListing.image?.filename && existingListing.image.filename !== "defaultimage") {

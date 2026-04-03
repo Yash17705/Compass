@@ -22,6 +22,27 @@
       <p class="card-text"><%=listing.country%></p>
     </div>
   </div>
+  <% if (listing.geometry && listing.geometry.coordinates && listing.geometry.coordinates.length === 2) { %>
+  <div class="col-lg-6 offset-lg-3 col-12 mt-4">
+    <h4>Where you'll be</h4>
+    <div
+      id="listing-map"
+      class="listing-map"
+      data-lng="<%= listing.geometry.coordinates[0] %>"
+      data-lat="<%= listing.geometry.coordinates[1] %>"
+      data-title="<%= listing.title %>"
+      data-location="<%= `${listing.location}, ${listing.country}` %>"
+    ></div>
+    <a
+      href="https://www.openstreetmap.org/?mlat=<%= listing.geometry.coordinates[1] %>&mlon=<%= listing.geometry.coordinates[0] %>#map=12/<%= listing.geometry.coordinates[1] %>/<%= listing.geometry.coordinates[0] %>"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn btn-outline-dark btn-sm mt-3"
+    >
+      Open in OpenStreetMap
+    </a>
+  </div>
+  <% } %>
   <br />
   <% if(currUser&&currUser._id.equals(listing.owner._id)){%>
   <div class="btns">

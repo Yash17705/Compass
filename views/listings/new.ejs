@@ -49,6 +49,7 @@
         <div class="mb-3 col-md-8">
           <label for="country" class="form-label">Country</label>
           <input
+            id="country"
             name="listing[country]"
             placeholder="enter country"
             type="text"
@@ -61,6 +62,7 @@
       <div class="mb-3">
         <label for="location" class="form-label">Location</label>
         <input
+          id="location"
           name="listing[location]"
           placeholder="enter location"
           type="text"
@@ -68,6 +70,21 @@
           required
         />
         <div class="invalid-feedback">Enter location</div>
+      </div>
+      <div class="mb-3">
+        <button
+          type="button"
+          class="btn btn-outline-dark location-check-btn"
+          data-map-target="listing-form-map"
+          data-location-input="location"
+          data-country-input="country"
+        >
+          Check location
+        </button>
+      </div>
+      <div class="mb-3">
+        <div id="listing-form-map" class="listing-map d-none"></div>
+        <p id="listing-form-map-status" class="location-status text-muted mt-2 mb-0"></p>
       </div>
       <button type="submit" class="btn btn-dark add-btn mt-3">Add</button>
       <br /><br />

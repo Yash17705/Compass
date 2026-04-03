@@ -114,3 +114,25 @@ footer {
     padding-left: 0;
     padding-right: 0;
 }
+
+.edit-preview-img{
+    display: block;
+    max-width: 18rem;
+    width: 100%;
+    height: 12rem;
+    object-fit: cover;
+    margin-top: 0.5rem;
+}
+
+.listing-map{
+    width: 100%;
+    height: 22rem;
+    border-radius: 1rem;
+    overflow: hidden;
+    margin-top: 0.75rem;
+    box-shadow: 0 12px 30px rgba(34, 34, 34, 0.12);
+}
+
+.location-status{
+    min-height: 1.5rem;
+}
