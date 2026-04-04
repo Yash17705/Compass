@@ -1,18 +1,46 @@
 # Compass
 
-Compass is a full-stack travel listing web app where users can explore destinations, add new stays, edit listings, and leave reviews. It is built with Node.js, Express, MongoDB, EJS, and Mongoose, and is currently still a work in progress.
+Compass is a full-stack travel listing web app for exploring, creating, and reviewing stay listings across destinations. It is built with Node.js, Express, MongoDB, EJS, and Mongoose, with server-rendered pages and a simple travel marketplace flow.
 
-## Description
+## Current Status
 
-Compass is designed as a lightweight property and stay discovery platform inspired by modern travel marketplaces. The current version focuses on the core CRUD flow for listings and reviews, with server-side rendering and a simple, clean interface.
+The project is functional and includes:
 
-## Preview
+- User signup, login, logout, and session handling
+- Listing CRUD with image uploads to Cloudinary
+- Review creation and deletion with author checks
+- OpenStreetMap location preview and listing map display
+- Search, category-style filters, and a tax toggle on the listings page
+- Joi-based request validation and flash messages
 
-- Browse all listings on a dedicated index page
-- View listing details with image, price, location, and country
+## Features
+
+### Listings
+
+- Browse all listings on `/listings`
 - Create, edit, and delete listings
-- Add and remove reviews with rating and comment validation
-- Seed the database with sample travel listings
+- Upload listing images with Multer + Cloudinary
+- Save `location`, `country`, and geocoded coordinates
+- View a map on the listing details page
+
+### Discovery UI
+
+- Search by title, description, location, or country
+- Airbnb-style filter chips such as beach, mountains, cabins, villas, city, luxury, and pools
+- Client-side tax toggle for displaying nightly price with 18% tax
+
+### Reviews
+
+- Add reviews to listings
+- Delete only your own reviews
+- Rating and comment validation using Joi
+
+### Authentication and Authorization
+
+- Sign up and log in with Passport Local
+- Protected listing creation, editing, deletion, and review actions
+- Owner checks for listings
+- Author checks for reviews
 
 ## Tech Stack
 
@@ -20,43 +48,68 @@ Compass is designed as a lightweight property and stay discovery platform inspir
 - Express.js
 - MongoDB
 - Mongoose
-- EJS + EJS-Mate
+- EJS
+- EJS-Mate
+- Passport.js
+- Passport Local
+- Passport Local Mongoose
 - Joi
-- Method Override
-- HTML/CSS/JavaScript
-
-## Current Features
-
-- Full CRUD support for listings
-- Review system connected to each listing
-- Joi-based request validation for listings and reviews
-- Mongoose models with review cleanup on listing deletion
-- Server-rendered pages using reusable EJS layouts and partials
-- Static assets for custom styling and client-side behavior
-
-## Work In Progress
-
-This project is actively under development. A few areas are still evolving:
-
-- Authentication and user accounts
-- Authorization for listing/review ownership
-- Better error handling and flash messages
-- Improved UI polish and responsive refinements
-- Image upload support instead of URL-only images
-- Search, filters, and category-based discovery
+- Multer
+- Cloudinary
+- OpenStreetMap + Nominatim
+- Leaflet
 
 ## Project Structure
 
 ```text
 Compass/
 ├── app.js
-├── models/
-├── views/
-├── public/
-├── init/
+├── cloudConfig.js
+├── middleware.js
 ├── schema.js
-└── package.json
+├── package.json
+├── controllers/
+│   ├── listings.js
+│   ├── reviews.js
+│   └── users.js
+├── init/
+│   ├── data.js
+│   └── index.js
+├── models/
+│   ├── listing.js
+│   ├── review.js
+│   └── user.js
+├── public/
+│   ├── css/
+│   └── js/
+├── routes/
+│   ├── listing.js
+│   ├── review.js
+│   └── user.js
+├── utils/
+│   ├── ExpressErrors.js
+│   ├── upload.js
+│   └── wrapAsync.js
+└── views/
+    ├── includes/
+    ├── layouts/
+    ├── listings/
+    └── users/
 ```
+
+## Environment Variables
+
+Create a `.env` file in the project root.
+
+Required:
+
+```env
+CLOUD_NAME=your_cloudinary_cloud_name
+CLOUD_API_KEY=your_cloudinary_api_key
+CLOUD_API_SECRET=your_cloudinary_api_secret
+```
+
+Also see [`.env.example`](/Users/yash/Desktop/Compass/.env.example).
 
 ## Getting Started
 
@@ -75,53 +128,84 @@ npm install
 
 ### 3. Start MongoDB locally
 
-Make sure MongoDB is running on:
+The app currently connects to:
 
-```bash
+```text
 mongodb://127.0.0.1:27017/compass
 ```
 
-### 4. Seed sample data
+### 4. Add environment variables
+
+Create `.env` with your Cloudinary credentials.
+
+### 5. Seed sample data
 
 ```bash
 node init/index.js
 ```
 
-### 5. Run the app
+Note: the seed script geocodes listing locations using OpenStreetMap Nominatim, so internet access is required while seeding.
+
+### 6. Run the app
 
 ```bash
 npm run dev
 ```
 
-Then open:
+Open:
 
 ```text
 http://localhost:8080/listings
 ```
 
-## Why Compass
+## Main Routes
 
-The goal of Compass is to practice and showcase full-stack fundamentals through a real, portfolio-friendly project:
+### Listing Routes
 
-- RESTful routing
-- CRUD operations
-- Schema validation
-- MongoDB relationships
-- Server-side rendering
-- Clean project organization
+- `GET /listings` - list all listings
+- `GET /listings/new` - render new listing form
+- `POST /listings` - create listing
+- `GET /listings/:id` - show single listing
+- `GET /listings/:id/edit` - render edit form
+- `PUT /listings/:id` - update listing
+- `DELETE /listings/:id` - delete listing
+
+### Review Routes
+
+- `POST /listings/:id/reviews` - create review
+- `DELETE /listings/:id/reviews/:reviewId` - delete review
+
+### User Routes
+
+- `GET /signup`
+- `POST /signup`
+- `GET /login`
+- `POST /login`
+- `GET /logout`
+
+## Notes
+
+- Listing images are stored in Cloudinary.
+- Listing coordinates are generated from `location + country`.
+- Existing listings without `geometry` will not show a map until they are re-saved or re-seeded.
+- The category chips are currently inferred from listing text, not stored as a dedicated schema field.
+- The tax toggle is a UI feature only and does not change stored prices.
+
+## Limitations
+
+- MongoDB connection string is currently hardcoded in `app.js`
+- Session secret is currently hardcoded in `app.js`
+- There is no automated test suite yet
+- Filter categories are inferred, not first-class model fields
 
 ## Roadmap
 
-- Add user authentication and sessions
-- Restrict edits/deletes to owners
-- Support image uploads with cloud storage
-- Add search and filtering
-- Improve form UX and validation feedback
-- Deploy the app publicly
-
-## Status
-
-Compass is not finished yet, but the base application is functional and growing. This repository reflects the ongoing build process and future improvements will continue to expand the platform.
+- Move secrets and database config fully into environment variables
+- Add a real listing category field
+- Backfill orphaned listing owners cleanly
+- Improve responsive polish further
+- Add automated tests
+- Deploy the app
 
 ## Author
 
