@@ -5,8 +5,9 @@ if (process.env.NODE_ENV != "production") {
 const mongoose = require("mongoose");
 const initData = require("./data.js");
 const Listing = require("../models/listing.js");
+const User = require("../models/user.js");
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/compass";
+const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/compass";
 
 main()
   .then(() => {
@@ -59,15 +60,23 @@ const geocodeListing = async (listing) => {
 
 const initDB = async () => {
   await Listing.deleteMany({});
+  const seedOwner = await User.findOne({ username: "yash" });
+  const owner =
+    seedOwner ||
+    (await User.register(
+      new User({ username: "yash", email: "yash@example.com" }),
+      "helloworld"
+    ));
+
   const listingsWithOwner = initData.data.map((obj) => ({
     ...obj,
-    owner: "69c4bbad2bb4168c2e2a2167",
+    owner: owner._id,
   }));
   const listingsWithGeometry = await Promise.all(
     listingsWithOwner.map(geocodeListing)
   );
   await Listing.insertMany(listingsWithGeometry);
-  console.log("data was initialized");
+  console.log(`data was initialized with owner @${owner.username}`);
 };
 
-initDB();
+initDB().then(() => mongoose.connection.close());

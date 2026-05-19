@@ -121,6 +121,28 @@
     });
   }
 
+  const taxToggle = document.getElementById('tax-toggle');
+  const listingPrices = document.querySelectorAll('.listing-price');
+
+  if (taxToggle && listingPrices.length > 0) {
+    const formatPrice = value =>
+      `\u20b9${Number(value).toLocaleString('en-IN')}`;
+
+    const applyTaxDisplay = () => {
+      listingPrices.forEach(priceElement => {
+        const basePrice = Number(priceElement.dataset.basePrice);
+        const taxPrice = Number(priceElement.dataset.taxPrice);
+
+        priceElement.textContent = taxToggle.checked
+          ? formatPrice(taxPrice)
+          : formatPrice(basePrice);
+      });
+    };
+
+    taxToggle.addEventListener('change', applyTaxDisplay);
+    applyTaxDisplay();
+  }
+
   const forms = document.querySelectorAll('.needs-validation')
 
   Array.from(forms).forEach(form => {

@@ -1,13 +1,30 @@
 <% layout("/layouts/boilerplate")%>
-<div class="row mt-3">
-  <div class="col-lg-6 offset-lg-3 col-12">
-    <h3><%= listing.title %></h3>
+<div class="listing-detail mt-3">
+  <div class="listing-detail-header">
+    <div>
+      <p class="filters-kicker mb-1"><%= listing.category || 'Stay' %></p>
+      <h3><%= listing.title %></h3>
+      <p class="listing-meta mb-0">
+        <%= listing.location %>, <%= listing.country %>
+        <% if (averageRating) { %>
+        · <i class="fa-solid fa-star"></i> <%= averageRating %> (<%= listing.reviews.length %> reviews)
+        <% } %>
+      </p>
+    </div>
+    <% if (currUser) { %>
+    <form method="POST" action="/listings/<%= listing._id %>/favorite">
+      <button class="btn <%= isFavorite ? 'btn-dark' : 'btn-outline-dark' %>" type="submit">
+        <i class="<%= isFavorite ? 'fa-solid' : 'fa-regular' %> fa-heart"></i>
+        <%= isFavorite ? 'Saved' : 'Save' %>
+      </button>
+    </form>
+    <% } %>
   </div>
-  <div class="card col-lg-6 offset-lg-3 col-12 show-card listing-card">
+  <div class="show-card listing-card">
     <img
       src="<%= listing.image && listing.image.url ? listing.image.url : 'https://via.placeholder.com/300' %>"
       class="card-img-top show-img"
-      alt="listing_image"
+      alt="<%= listing.title %>"
     />
     <div class="card-body">
       <p class="card-text">
@@ -15,15 +32,23 @@
       </p>
 
       <p class="card-text"><%=listing.description%></p>
-      <p class="card-text">
-        &#8377; <%=listing.price.toLocaleString("en-IN")%>
-      </p>
-      <p class="card-text"><%=listing.location%></p>
-      <p class="card-text"><%=listing.country%></p>
+      <div class="show-facts">
+        <span><i class="fa-solid fa-indian-rupee-sign"></i> <%=listing.price.toLocaleString("en-IN")%> / night</span>
+        <span><i class="fa-solid fa-user-group"></i> <%= listing.guests || 2 %> guests</span>
+        <span><i class="fa-solid fa-bed"></i> <%= listing.bedrooms || 1 %> bedrooms</span>
+        <span><i class="fa-solid fa-bath"></i> <%= listing.bathrooms || 1 %> baths</span>
+      </div>
+      <% if (listing.amenities && listing.amenities.length > 0) { %>
+      <div class="amenities-list">
+        <% for (let amenity of listing.amenities) { %>
+        <span><i class="fa-solid fa-check"></i> <%= amenity %></span>
+        <% } %>
+      </div>
+      <% } %>
     </div>
   </div>
   <% if (listing.geometry && listing.geometry.coordinates && listing.geometry.coordinates.length === 2) { %>
-  <div class="col-lg-6 offset-lg-3 col-12 mt-4">
+  <div class="mt-4">
     <h4>Where you'll be</h4>
     <div
       id="listing-map"
@@ -45,20 +70,20 @@
   <% } %>
   <br />
   <% if (currUser && listing.owner && currUser._id.equals(listing.owner._id)) { %>
-  <div class="btns">
+  <div class="btns owner-actions">
     <a
       href="/listings/<%=listing._id%>/edit"
-      class="btn btn-dark col-1 offset-3 edit-btn"
+      class="btn btn-dark edit-btn"
       >Edit</a
     >
 
     <form method="post" action="/listings/<%=listing._id%>?_method=DELETE">
-      <button class="btn btn-dark offset-5">Delete</button>
+      <button class="btn btn-outline-danger">Delete</button>
     </form>
   </div>
   <%}%>
 
-  <div class="col-lg-6 offset-lg-3 col-12 mb-3">
+  <div class="mb-3">
     <hr />
     <% if(currUser){%>
     <h4>Leave a Review</h4>
@@ -133,6 +158,9 @@
     <%}%>
     <hr />
     <p><b>All Reviews</b></p>
+    <% if (listing.reviews.length === 0) { %>
+    <p class="listing-meta">No reviews yet.</p>
+    <% } %>
     <div class="row">
       <% for (let review of listing.reviews) { %>
       <div class="col-md-6 mb-3">

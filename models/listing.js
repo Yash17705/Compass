@@ -7,6 +7,32 @@ const listingSchema = new Schema({
     required: true,
   },
   description: String,
+  category: {
+    type: String,
+    enum: ["beach", "mountains", "cabins", "villas", "city", "luxury", "pools", "countryside"],
+    default: "city",
+  },
+  amenities: [
+    {
+      type: String,
+      trim: true,
+    },
+  ],
+  guests: {
+    type: Number,
+    min: 1,
+    default: 2,
+  },
+  bedrooms: {
+    type: Number,
+    min: 0,
+    default: 1,
+  },
+  bathrooms: {
+    type: Number,
+    min: 0,
+    default: 1,
+  },
   image: {
     url: {
       type: String,
@@ -44,7 +70,7 @@ const listingSchema = new Schema({
     type:Schema.Types.ObjectId,
     ref:"User"
   }
-});
+}, { timestamps: true });
 
 listingSchema.index({ geometry: "2dsphere" });
 

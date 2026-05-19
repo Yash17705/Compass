@@ -15,8 +15,15 @@ router
 //new route
 router.get("/new", isLoggedIn, listingController.renderNewForm);
 
+router.get("/favorites", isLoggedIn, (req, res) => {
+  const params = new URLSearchParams({ ...req.query, favorites: "true" });
+  res.redirect(`/listings?${params.toString()}`);
+});
+
 //edit route
 router.get("/:id/edit", isLoggedIn, isOwner, wrapAsync(listingController.renderEditForm));
+
+router.post("/:id/favorite", isLoggedIn, wrapAsync(listingController.toggleFavorite));
 
 router
   .route("/:id")

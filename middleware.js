@@ -29,6 +29,11 @@ module.exports.normalizeListingBody = (req, res, next) => {
     location: req.body["listing[location]"] ?? req.body.location,
     country: req.body["listing[country]"] ?? req.body.country,
     price: req.body["listing[price]"] ?? req.body.price,
+    category: req.body["listing[category]"] ?? req.body.category,
+    guests: req.body["listing[guests]"] ?? req.body.guests,
+    bedrooms: req.body["listing[bedrooms]"] ?? req.body.bedrooms,
+    bathrooms: req.body["listing[bathrooms]"] ?? req.body.bathrooms,
+    amenities: req.body["listing[amenities]"] ?? req.body.amenities,
     image: req.body["listing[image]"] ?? req.body.image,
   };
 
@@ -40,6 +45,12 @@ module.exports.normalizeListingBody = (req, res, next) => {
 }
 
 module.exports.validateListing = (req, res, next) => {
+  if (req.body.listing && !Array.isArray(req.body.listing.amenities)) {
+    req.body.listing.amenities = req.body.listing.amenities
+      ? [req.body.listing.amenities]
+      : [];
+  }
+
   let { error } = listingSchema.validate(req.body);
 
   if (error) {

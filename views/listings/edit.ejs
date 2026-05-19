@@ -1,7 +1,8 @@
 <% layout("/layouts/boilerplate")%>
-<h3>Edit your listing</h3>
-<div class="row mt-3">
-  <div class="col-8 offset-2">
+<div class="form-shell">
+  <div class="form-panel">
+    <p class="filters-kicker mb-1">Host dashboard</p>
+    <h3>Edit your listing</h3>
     <form
       method="POST"
       action="/listings/<%=listing._id%>?_method=put"
@@ -19,6 +20,32 @@
           required
         />
         <div class="invalid-feedback">Please enter a title.</div>
+      </div>
+      <div class="row">
+        <div class="mb-3 col-md-4">
+          <label for="category" class="form-label">Category</label>
+          <select id="category" name="listing[category]" class="form-select" required>
+            <% for (let filter of filters.filter((item) => item.key !== 'trending')) { %>
+            <option value="<%= filter.key %>" <%= listing.category === filter.key ? 'selected' : '' %>><%= filter.label %></option>
+            <% } %>
+          </select>
+        </div>
+        <div class="mb-3 col-md-8">
+          <label class="form-label">Amenities</label>
+          <div class="amenity-grid">
+            <% for (let amenity of amenities) { %>
+            <label class="amenity-choice">
+              <input
+                type="checkbox"
+                name="listing[amenities]"
+                value="<%= amenity %>"
+                <%= listing.amenities?.includes(amenity) ? 'checked' : '' %>
+              />
+              <span><%= amenity %></span>
+            </label>
+            <% } %>
+          </div>
+        </div>
       </div>
       <div class="mb-3">
         <label for="description" class="form-label">Description</label>
@@ -58,6 +85,20 @@
             required
           />
           <div class="invalid-feedback">Please enter a valid price.</div>
+        </div>
+        <div class="mb-3 col-md-4">
+          <label for="guests" class="form-label">Guests</label>
+          <input id="guests" name="listing[guests]" value="<%= listing.guests || 2 %>" type="number" min="1" class="form-control" required />
+        </div>
+        <div class="mb-3 col-md-4">
+          <label for="bedrooms" class="form-label">Bedrooms</label>
+          <input id="bedrooms" name="listing[bedrooms]" value="<%= listing.bedrooms || 1 %>" type="number" min="0" class="form-control" required />
+        </div>
+      </div>
+      <div class="row">
+        <div class="mb-3 col-md-4">
+          <label for="bathrooms" class="form-label">Bathrooms</label>
+          <input id="bathrooms" name="listing[bathrooms]" value="<%= listing.bathrooms || 1 %>" type="number" min="0" class="form-control" required />
         </div>
         <div class="mb-3 col-md-8">
           <label for="country" class="form-label">Country</label>

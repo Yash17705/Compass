@@ -4,8 +4,12 @@
   "description": "Compass is a full-stack travel listing web app for exploring, creating, and reviewing stay listings across destinations.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "seed": "node init/index.js",
+    "backfill:owners": "node scripts/backfillListingOwners.js",
+    "format": "prettier --write \"**/*.{js,ejs,css,json,md}\"",
+    "test": "node --check app.js && node --check controllers/listings.js && node --check controllers/users.js && node --check middleware.js && node --check models/listing.js && node --check models/user.js && node --check routes/listing.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +24,7 @@
   },
   "homepage": "https://github.com/Yash17705/Compass#readme",
   "dependencies": {
+    "@vitejs/plugin-react": "^6.0.2",
     "cloudinary": "^1.41.3",
     "connect-flash": "^0.1.1",
     "dotenv": "^17.3.1",
@@ -34,7 +39,10 @@
     "multer-storage-cloudinary": "^4.0.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^9.0.1"
+    "passport-local-mongoose": "^9.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^8.0.13"
   },
   "devDependencies": {
     "nodemon": "^3.1.11",

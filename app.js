@@ -20,7 +20,8 @@ const listingRouter= require("./routes/listing.js")
 const reviewRouter= require("./routes/review.js")
 const userRouter= require("./routes/user.js")
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/compass";
+const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/compass";
+const PORT = process.env.PORT || 8080;
 const DEFAULT_IMAGE_URL =
   "https://images.unsplash.com/photo-1625505826533-5c80aca7d157?auto=format&fit=crop&w=800&q=60";
 main()
@@ -44,17 +45,19 @@ app.use(express.static(path.join(__dirname,"/public")));
 
 
 const sessionOptions={
-  secret:"scrtcode",
+  secret: process.env.SESSION_SECRET || "development_secret_change_me",
   resave:false,
   saveUninitialized:true,
   cookie:{
     expires: Date.now()+7*24*60*60*1000,
     maxAge:7*24*60*60*1000,
-    httpOnly:true
+    httpOnly:true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production"
   }
 };
 app.get("/", (req, res) => {
-  res.send("Hi, I am root");
+  res.redirect("/listings");
 });
 
 app.use(session(sessionOptions))
@@ -99,6 +102,14 @@ app.use((err,req,res,next)=>{
   res.status(statusCode).render("error.ejs",{message})
   // res.status(statusCode).send(message);
 })
-app.listen(8080, () => {
-  console.log("server is listening to port 8080");
+const server = app.listen(PORT, () => {
+  console.log(`server is listening to port ${PORT}`);
 });
+
+const shutdown = async () => {
+  await mongoose.connection.close();
+  server.close(() => process.exit(0));
+};
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
