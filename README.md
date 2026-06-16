@@ -1,213 +1,121 @@
-# Compass
+# 🗺️ Compass
 
-Compass is a full-stack travel listing web app for exploring, creating, and reviewing stay listings across destinations. It is built with Node.js, Express, MongoDB, EJS, and Mongoose, with server-rendered pages and a simple travel marketplace flow.
+Compass is a modern, premium full-stack travel marketplace and listing application. It allows users to explore, host, and review stay listings across various worldwide destinations. Built with a robust backend and a highly polished, responsive client-side experience, it is ready to be showcased in any developer portfolio.
 
-## Current Status
+🔗 **Live Demo:** [https://compass-travel-app.onrender.com/listings](https://compass-travel-app.onrender.com/listings)
 
-The project is functional and includes:
+---
 
-- User signup, login, logout, and session handling
-- Listing CRUD with image uploads to Cloudinary
-- Review creation and deletion with author checks
-- OpenStreetMap location preview and listing map display
-- Search, category-style filters, and a tax toggle on the listings page
-- Joi-based request validation and flash messages
+## ✨ Key Features
 
-## Features
+### 🌟 Discovery & UX
+* **Dynamic Search & Explore:** Fast client-side filtering, sorting (price high-to-low, price low-to-high, title, newest), and instant keyword matching.
+* **Airbnb-Style Filter Chips:** Category-based filters (e.g. Beach, Mountains, Cabins, Villas, City, Pools, Countryside) with matching icons.
+* **Interactive Mapping:** Interactive maps powered by **Leaflet & OpenStreetMap** showing exact listing locations (geocoded automatically during creation using Nominatim).
+* **Nightly Tax Toggle:** A client-side switch that dynamically updates the night rates to include a standard 18% service tax.
+* **Favorites System:** Logged-in users can mark listings as favorites to view them in their personal list.
+* **"My Listings" Filter:** Quick toggle for hosts to easily view and manage only the stays they have posted.
 
-### Listings
+### 🏠 Host & Review Management
+* **Listing CRUD:** Full capability to create, read, update, and delete listings.
+* **Cloud Asset Uploads:** Listing images are securely uploaded and stored in **Cloudinary** using **Multer**.
+* **Review System:** Threaded reviews showing a 5-star graphical rating (powered by Starability) and user comments.
 
-- Browse all listings on `/listings`
-- Create, edit, and delete listings
-- Upload listing images with Multer + Cloudinary
-- Save `location`, `country`, and geocoded coordinates
-- View a map on the listing details page
+### 🔒 Security & Performance
+* **Session Persistence:** Persistent sessions managed via **Connect-Mongo** and MongoDB Atlas.
+* **Robust Password Standards:** Custom registration validator requiring a minimum length of 8 characters, at least one capital letter, a number, and a special character.
+* **Input Sanitization:** Safeguards against MongoDB injection attacks using **Express Mongo Sanitize**.
+* **HTTP Security Headers:** Integrated **Helmet** with a strict Content Security Policy (CSP) and dynamic cryptographic nonces.
+* **Express Rate Limiting:** Global rate limiters to protect endpoints against brute force and DDoS attacks.
+* **Joi Validation:** Strict schema validation for incoming listing and review payloads.
 
-### Discovery UI
+---
 
-- Search by title, description, location, or country
-- Airbnb-style filter chips such as beach, mountains, cabins, villas, city, luxury, and pools
-- Fully dynamic React-powered browsing experience with instant filtering, sorting, and list/grid views
-- Client-side tax toggle for displaying nightly price with 18% tax
+## 🛠️ Tech Stack
 
-### Reviews
+* **Frontend:** EJS (HTML Template Engine), EJS-Mate layouts, Vanilla CSS, React (for dynamic exploring & detail view widgets), Leaflet (Maps)
+* **Backend:** Node.js, Express.js (v5.x), Passport.js (Authentication)
+* **Database:** MongoDB Atlas (Cloud Database), Mongoose (ODM), Connect-Mongo (Session Store)
+* **Storage:** Cloudinary (Listing Images)
+* **Validation:** Joi
 
-- Add reviews to listings
-- Delete only your own reviews
-- Rating and comment validation using Joi
+---
 
-### Authentication and Authorization
-
-- Sign up and log in with Passport Local
-- Protected listing creation, editing, deletion, and review actions
-- Owner checks for listings
-- Author checks for reviews
-
-## Tech Stack
-
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- EJS
-- EJS-Mate
-- Passport.js
-- Passport Local
-- Passport Local Mongoose
-- Joi
-- Multer
-- Cloudinary
-- OpenStreetMap + Nominatim
-- Leaflet
-
-## Project Structure
+## 📁 Project Architecture
 
 ```text
 Compass/
-├── app.js
-├── cloudConfig.js
-├── middleware.js
-├── schema.js
-├── package.json
-├── controllers/
-│   ├── listings.js
-│   ├── reviews.js
-│   └── users.js
-├── init/
-│   ├── data.js
-│   └── index.js
-├── models/
-│   ├── listing.js
-│   ├── review.js
-│   └── user.js
-├── public/
-│   ├── css/
-│   └── js/
-├── routes/
-│   ├── listing.js
-│   ├── review.js
-│   └── user.js
-├── utils/
-│   ├── ExpressErrors.js
-│   ├── upload.js
-│   └── wrapAsync.js
-└── views/
-    ├── includes/
-    ├── layouts/
-    ├── listings/
-    └── users/
+├── app.js               # Express application entry point & middlewares
+├── cloudConfig.js       # Cloudinary and Multer configuration
+├── middleware.js        # Auth, ownership, and normalization middlewares
+├── schema.js            # Joi verification schemas
+├── controllers/         # MVC Controllers (listings, reviews, users)
+├── init/                # Database seeding script and initial datasets
+├── models/              # Mongoose Schemas (User, Listing, Review)
+├── public/              # Static assets (CSS, client React bundles)
+├── routes/              # Express Routers (listings, reviews, users)
+└── views/               # EJS template folders
 ```
 
-## Environment Variables
+---
 
-Create a `.env` file in the project root.
+## ⚙️ Getting Started
 
-Required:
+To run Compass locally on your machine, follow these steps:
 
-```env
-CLOUD_NAME=your_cloudinary_cloud_name
-CLOUD_API_KEY=your_cloudinary_api_key
-CLOUD_API_SECRET=your_cloudinary_api_secret
-```
-
-Also see [`.env.example`](/Users/yash/Desktop/Compass/.env.example).
-
-## Getting Started
-
-### 1. Clone the repository
-
+### 1. Clone & Install
 ```bash
 git clone https://github.com/Yash17705/Compass.git
 cd Compass
-```
-
-### 2. Install dependencies
-
-```bash
 npm install
 ```
 
-### 3. Start MongoDB locally
-
-The app currently connects to:
-
-```text
-mongodb://127.0.0.1:27017/compass
+### 2. Configure Environment Variables
+Create a `.env` file in the root directory:
+```env
+CLOUD_NAME=your_cloudinary_name
+CLOUD_API_KEY=your_cloudinary_key
+CLOUD_API_SECRET=your_cloudinary_secret
+MONGO_URL=mongodb://127.0.0.1:27017/compass
+SESSION_SECRET=a_long_random_session_encryption_key
+PORT=8080
 ```
 
-### 4. Add environment variables
-
-Create `.env` with your Cloudinary credentials.
-
-### 5. Seed sample data
-
+### 3. Initialize the Database
+Make sure you have MongoDB running locally, then run the seed command to load sample listings:
 ```bash
-node init/index.js
+npm run seed
 ```
 
-Note: the seed script geocodes listing locations using OpenStreetMap Nominatim, so internet access is required while seeding.
-
-### 6. Run the app
-
+### 4. Run the Dev Server
 ```bash
 npm run dev
 ```
+Open [http://localhost:8080](http://localhost:8080) in your browser.
 
-Open:
+---
 
-```text
-http://localhost:8080/listings
-```
+## 🚀 API Endpoints
 
-## Main Routes
+### Listings
+* `GET /listings` — Browse all listings
+* `POST /listings` — Create a new listing (Auth required)
+* `GET /listings/:id` — Detail view of a stay
+* `PUT /listings/:id` — Update a listing (Owner required)
+* `DELETE /listings/:id` — Delete a listing (Owner required)
+* `POST /listings/:id/favorite` — Toggle favorite status (Auth required)
 
-### Listing Routes
+### Reviews
+* `POST /listings/:id/reviews` — Post a listing review (Auth required)
+* `DELETE /listings/:id/reviews/:reviewId` — Remove a review (Author required)
 
-- `GET /listings` - list all listings
-- `GET /listings/new` - render new listing form
-- `POST /listings` - create listing
-- `GET /listings/:id` - show single listing
-- `GET /listings/:id/edit` - render edit form
-- `PUT /listings/:id` - update listing
-- `DELETE /listings/:id` - delete listing
+### Users & Authentication
+* `GET /signup` / `POST /signup` — User registration (Strict passwords)
+* `GET /login` / `POST /login` — Log in and session generation
+* `GET /logout` — Log out and session destruction
 
-### Review Routes
+---
 
-- `POST /listings/:id/reviews` - create review
-- `DELETE /listings/:id/reviews/:reviewId` - delete review
+## 👤 Author
 
-### User Routes
-
-- `GET /signup`
-- `POST /signup`
-- `GET /login`
-- `POST /login`
-- `GET /logout`
-
-## Notes
-
-- Listing images are stored in Cloudinary.
-- Listing coordinates are generated from `location + country`.
-- Existing listings without `geometry` will not show a map until they are re-saved or re-seeded.
-- The category chips are currently inferred from listing text, not stored as a dedicated schema field.
-- The tax toggle is a UI feature only and does not change stored prices.
-
-## Limitations
-
-- MongoDB connection string is currently hardcoded in `app.js`
-- Session secret is currently hardcoded in `app.js`
-- There is no automated test suite yet
-- Filter categories are inferred, not first-class model fields
-
-## Roadmap
-
-- Move secrets and database config fully into environment variables
-- Add a real listing category field
-- Backfill orphaned listing owners cleanly
-- Improve responsive polish further
-- Add automated tests
-- Deploy the app
-
-## Author
-
-Yash
+* **Yash** - [GitHub](https://github.com/Yash17705)
