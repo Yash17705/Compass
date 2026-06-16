@@ -193,7 +193,11 @@ app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
-app.all("/{*splat}", (req, res, next) => {
+// Serve a 204 No Content for favicon to prevent cluttering logs
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
+// Catch-all for non-existing routes
+app.use((req, res, next) => {
   next(new ExpressError(404, "Page not found"));
 });
 
