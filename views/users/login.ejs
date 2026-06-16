@@ -3,6 +3,7 @@
   <h1 class="col-6 offset-3">Login</h1>
   <div class="col-6 offset-3">
     <form action="/login" method="POST" class="needs-validation" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <div class="mb-3">
         <label for="username" class="form-label">Username</label>
         <input

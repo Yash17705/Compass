@@ -38,13 +38,15 @@ const FILTERS = [
     key: "city",
     label: "City",
     icon: "fa-solid fa-city",
-    matches: (text) => /downtown|city|apartment|loft|penthouse|brownstone/i.test(text),
+    matches: (text) =>
+      /downtown|city|apartment|loft|penthouse|brownstone/i.test(text),
   },
   {
     key: "luxury",
     label: "Luxury",
     icon: "fa-solid fa-gem",
-    matches: (text) => /luxury|luxurious|exclusive|penthouse|private island|opulent/i.test(text),
+    matches: (text) =>
+      /luxury|luxurious|exclusive|penthouse|private island|opulent/i.test(text),
   },
   {
     key: "pools",
@@ -56,7 +58,8 @@ const FILTERS = [
     key: "countryside",
     label: "Countryside",
     icon: "fa-solid fa-seedling",
-    matches: (text) => /farm|countryside|vineyard|cottage|serene|rural/i.test(text),
+    matches: (text) =>
+      /farm|countryside|vineyard|cottage|serene|rural/i.test(text),
   },
 ];
 
@@ -89,7 +92,7 @@ const getListingText = (listing) =>
 const getListingFilters = (listing) => {
   const text = getListingText(listing);
   const inferredFilters = FILTERS.filter(
-    (filter) => filter.key !== "trending" && filter.matches(text)
+    (filter) => filter.key !== "trending" && filter.matches(text),
   ).map((filter) => filter.key);
 
   if (listing.category && !inferredFilters.includes(listing.category)) {
@@ -105,7 +108,10 @@ const getAverageRating = (listing) => {
     return null;
   }
 
-  const ratingTotal = reviews.reduce((total, review) => total + review.rating, 0);
+  const ratingTotal = reviews.reduce(
+    (total, review) => total + review.rating,
+    0,
+  );
   return Number((ratingTotal / reviews.length).toFixed(1));
 };
 
@@ -133,21 +139,18 @@ const geocodeListingLocation = async (location, country) => {
         "User-Agent": "Compass/1.0 (listing geocoder)",
         Accept: "application/json",
       },
-    }
+    },
   );
 
   if (!response.ok) {
-    throw new ExpressError(502, "OpenStreetMap geocoding request failed.");
+    return null;
   }
 
   const results = await response.json();
   const match = results[0];
 
   if (!match) {
-    throw new ExpressError(
-      400,
-      "Unable to find coordinates for that location. Try a more specific place."
-    );
+    return null;
   }
 
   return {
@@ -164,6 +167,7 @@ module.exports.index = async (req, res) => {
   const maxPrice = Number(req.query.maxPrice);
   const selectedGuests = Number(req.query.guests);
   const favoritesOnly = req.query.favorites === "true";
+  const myListingsOnly = req.query.myListings === "true";
   const favoriteIds = await getFavoriteIds(req.user?._id);
   const allListings = await Listing.find({})
     .populate("reviews")
@@ -181,26 +185,41 @@ module.exports.index = async (req, res) => {
     selectedFilter === "trending"
       ? listingsWithFilters
       : listingsWithFilters.filter((listing) =>
-          listing.matchedFilters.includes(selectedFilter)
+          listing.matchedFilters.includes(selectedFilter),
         );
 
   const filteredListings = searchQuery
     ? filterMatchedListings.filter((listing) =>
-        listing.searchText.includes(searchQuery.toLowerCase())
+        listing.searchText.includes(searchQuery.toLowerCase()),
       )
     : filterMatchedListings;
 
   const priceFilteredListings = filteredListings.filter((listing) => {
-    const aboveMin = Number.isFinite(minPrice) ? listing.price >= minPrice : true;
-    const belowMax = Number.isFinite(maxPrice) ? listing.price <= maxPrice : true;
-    const enoughGuests = Number.isFinite(selectedGuests) ? listing.guests >= selectedGuests : true;
+    const aboveMin = Number.isFinite(minPrice)
+      ? listing.price >= minPrice
+      : true;
+    const belowMax = Number.isFinite(maxPrice)
+      ? listing.price <= maxPrice
+      : true;
+    const enoughGuests = Number.isFinite(selectedGuests)
+      ? listing.guests >= selectedGuests
+      : true;
     const favorited = favoritesOnly ? listing.isFavorite : true;
 
     return aboveMin && belowMax && enoughGuests && favorited;
   });
 
+  const legacyListings =
+    myListingsOnly && req.user
+      ? priceFilteredListings.filter(
+          (listing) =>
+            listing.owner &&
+            listing.owner.toString() === req.user._id.toString(),
+        )
+      : priceFilteredListings;
+
   res.render("listings/index.ejs", {
-    allListings: priceFilteredListings,
+    allListings: legacyListings,
     filters: FILTERS,
     selectedFilter,
     searchQuery,
@@ -209,10 +228,12 @@ module.exports.index = async (req, res) => {
     maxPrice: Number.isFinite(maxPrice) ? maxPrice : "",
     selectedGuests: Number.isFinite(selectedGuests) ? selectedGuests : "",
     favoritesOnly,
+    myListingsOnly,
     reactExploreData: {
       listings: priceFilteredListings.map((listing) => ({
         id: listing._id.toString(),
         title: listing.title,
+        category: listing.category || "Stay",
         location: listing.location,
         country: listing.country,
         price: listing.price,
@@ -221,11 +242,28 @@ module.exports.index = async (req, res) => {
         bathrooms: listing.bathrooms || 1,
         imageUrl: listing.image?.url,
         averageRating: listing.averageRating,
+        reviewCount: listing.reviewCount,
         isFavorite: listing.isFavorite,
         href: `/listings/${listing._id}`,
+        filters: listing.matchedFilters,
+        createdAt: listing.createdAt?.toISOString(),
+        ownerId: listing.owner ? listing.owner.toString() : null,
       })),
-      initialSearch: searchQuery,
+      filters: FILTERS,
+      selectedFilter,
+      selectedSort,
+      minPrice: Number.isFinite(minPrice) ? minPrice : "",
+      maxPrice: Number.isFinite(maxPrice) ? maxPrice : "",
+      selectedGuests: Number.isFinite(selectedGuests) ? selectedGuests : "",
       favoritesOnly,
+      myListingsOnly,
+      initialSearch: searchQuery,
+      currUser: req.user
+        ? {
+            id: req.user._id.toString(),
+            username: req.user.username,
+          }
+        : null,
     },
   });
 };
@@ -256,6 +294,47 @@ module.exports.showListing = async (req, res) => {
     listing,
     averageRating,
     isFavorite: favoriteIds.includes(listing._id.toString()),
+    reactListingData: {
+      id: listing._id.toString(),
+      title: listing.title,
+      category: listing.category || "Stay",
+      location: listing.location,
+      country: listing.country,
+      description: listing.description,
+      imageUrl: listing.image?.url,
+      price: listing.price,
+      guests: listing.guests || 2,
+      bedrooms: listing.bedrooms || 1,
+      bathrooms: listing.bathrooms || 1,
+      amenities: listing.amenities || [],
+      averageRating,
+      reviewCount: listing.reviews.length,
+      ownerName: listing.owner?.username || "Unknown host",
+      isFavorite: favoriteIds.includes(listing._id.toString()),
+      geometry: listing.geometry,
+      href: `/listings/${listing._id}`,
+      owner: listing.owner
+        ? {
+            id: listing.owner._id.toString(),
+            username: listing.owner.username,
+          }
+        : null,
+      currUser: req.user
+        ? {
+            id: req.user._id.toString(),
+            username: req.user.username,
+          }
+        : null,
+      reviews: listing.reviews.map((review) => ({
+        id: review._id.toString(),
+        rating: review.rating,
+        comment: review.comment,
+        author: {
+          id: review.author._id.toString(),
+          username: review.author.username,
+        },
+      })),
+    },
   });
 };
 
@@ -269,7 +348,7 @@ module.exports.createListing = async (req, res) => {
   delete newListingData.image;
   newListingData.geometry = await geocodeListingLocation(
     newListingData.location,
-    newListingData.country
+    newListingData.country,
   );
   if (req.file) {
     newListingData.image = {
@@ -281,7 +360,12 @@ module.exports.createListing = async (req, res) => {
   const newlisting = new Listing(newListingData);
   newlisting.owner = req.user._id;
   await newlisting.save();
-  req.flash("success", "New Listing Created");
+  req.flash(
+    "success",
+    newListingData.geometry
+      ? "New listing created"
+      : "New listing created. Map coordinates could not be resolved yet.",
+  );
   res.redirect("/listings");
 };
 
@@ -293,10 +377,17 @@ module.exports.renderEditForm = async (req, res) => {
     req.flash("error", " Listing does not exist");
     return res.redirect("/listings");
   }
-  let originalImageUrl= listing.image.url
-  originalImageUrl.replace("/upload","/upload/h_300,w_250")
-  
-  res.render("listings/edit.ejs", { listing, originalImageUrl, filters: FILTERS, amenities: AMENITIES });
+  let originalImageUrl =
+    listing.image?.url ||
+    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80";
+  originalImageUrl = originalImageUrl.replace("/upload", "/upload/h_300,w_250");
+
+  res.render("listings/edit.ejs", {
+    listing,
+    originalImageUrl,
+    filters: FILTERS,
+    amenities: AMENITIES,
+  });
 };
 
 module.exports.updateListing = async (req, res) => {
@@ -320,12 +411,15 @@ module.exports.updateListing = async (req, res) => {
   if (locationChanged) {
     updatedListingData.geometry = await geocodeListingLocation(
       updatedListingData.location,
-      updatedListingData.country
+      updatedListingData.country,
     );
   }
   let oldImageFilename = null;
   if (req.file) {
-    if (existingListing.image?.filename && existingListing.image.filename !== "defaultimage") {
+    if (
+      existingListing.image?.filename &&
+      existingListing.image.filename !== "defaultimage"
+    ) {
       oldImageFilename = existingListing.image.filename;
     }
     updatedListingData.image = {
@@ -338,7 +432,12 @@ module.exports.updateListing = async (req, res) => {
   if (oldImageFilename) {
     await cloudinary.uploader.destroy(oldImageFilename);
   }
-  req.flash("success", "Listing Updated");
+  req.flash(
+    "success",
+    updatedListingData.geometry
+      ? "Listing updated"
+      : "Listing updated. Map coordinates could not be refreshed yet.",
+  );
   res.redirect(`/listings/${id}`);
 };
 
@@ -370,17 +469,31 @@ module.exports.toggleFavorite = async (req, res) => {
 
   const user = await User.findById(req.user._id);
   const favoriteIndex = user.favoriteListings.findIndex((listingId) =>
-    listingId.equals(listing._id)
+    listingId.equals(listing._id),
   );
+
+  const isJson = req.get("Accept")?.includes("json");
 
   if (favoriteIndex === -1) {
     user.favoriteListings.push(listing._id);
-    req.flash("success", "Saved to your favorites");
+    if (!isJson) req.flash("success", "Saved to your favorites");
   } else {
     user.favoriteListings.splice(favoriteIndex, 1);
-    req.flash("success", "Removed from your favorites");
+    if (!isJson) req.flash("success", "Removed from your favorites");
   }
 
   await user.save();
+
+  if (isJson) {
+    return res.json({
+      success: true,
+      isFavorite: favoriteIndex === -1,
+      message:
+        favoriteIndex === -1
+          ? "Saved to your favorites"
+          : "Removed from your favorites",
+    });
+  }
+
   res.redirect(req.get("Referer") || `/listings/${id}`);
 };

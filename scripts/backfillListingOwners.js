@@ -31,11 +31,11 @@ const main = async () => {
 
   await Listing.updateMany(
     { _id: { $in: listingsToBackfill.map((listing) => listing._id) } },
-    { $set: { owner: owner._id } }
+    { $set: { owner: owner._id } },
   );
 
   console.log(
-    `Assigned ${listingsToBackfill.length} ownerless listing(s) to @${owner.username}.`
+    `Assigned ${listingsToBackfill.length} ownerless listing(s) to @${owner.username}.`,
   );
 };
 

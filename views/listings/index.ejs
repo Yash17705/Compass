@@ -1,183 +1,179 @@
 <% layout("/layouts/boilerplate")%>
-<section class="filters-shell">
-  <div class="filters-header">
-    <div>
-      <p class="filters-kicker mb-1">Discover stays</p>
-      <h3 class="filters-title mb-0">Browse listings</h3>
-    </div>
-    <form action="/listings" method="GET" class="search-bar">
-      <% if (selectedFilter !== 'trending') { %>
-      <input type="hidden" name="filter" value="<%= selectedFilter %>" />
-      <% } %>
-      <% if (favoritesOnly) { %>
-      <input type="hidden" name="favorites" value="true" />
-      <% } %>
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input
-        type="search"
-        name="q"
-        class="search-input"
-        placeholder="Search by title, place, or country"
-        value="<%= searchQuery || '' %>"
-      />
-      <% if (searchQuery) { %>
-      <a
-        href="/listings?<%= selectedFilter === 'trending' ? '' : `filter=${selectedFilter}` %>"
-        class="search-clear"
-      >
-        Clear
-      </a>
-      <% } %>
-    </form>
-  </div>
-  <div class="filters-row">
-    <% for (let filter of filters) { %>
-    <a
-      href="/listings?<%= new URLSearchParams({
-        ...(filter.key === 'trending' ? {} : { filter: filter.key }),
-        ...(searchQuery ? { q: searchQuery } : {}),
-        ...(favoritesOnly ? { favorites: 'true' } : {})
-      }).toString() %>"
-      class="filter-chip <%= selectedFilter === filter.key ? 'active' : '' %>"
-      aria-current="<%= selectedFilter === filter.key ? 'page' : 'false' %>"
-    >
-      <i class="<%= filter.icon %>"></i>
-      <span><%= filter.label %></span>
-    </a>
-    <% } %>
-  </div>
-  <form action="/listings" method="GET" class="advanced-filters">
-    <% if (selectedFilter !== 'trending') { %>
-    <input type="hidden" name="filter" value="<%= selectedFilter %>" />
-    <% } %>
-    <% if (searchQuery) { %>
-    <input type="hidden" name="q" value="<%= searchQuery %>" />
-    <% } %>
-    <% if (favoritesOnly) { %>
-    <input type="hidden" name="favorites" value="true" />
-    <% } %>
-    <label>
-      <span>Min price</span>
-      <input type="number" name="minPrice" min="0" value="<%= minPrice %>" placeholder="0" />
-    </label>
-    <label>
-      <span>Max price</span>
-      <input type="number" name="maxPrice" min="0" value="<%= maxPrice %>" placeholder="10000" />
-    </label>
-    <label>
-      <span>Guests</span>
-      <input type="number" name="guests" min="1" value="<%= selectedGuests %>" placeholder="2" />
-    </label>
-    <label>
-      <span>Sort</span>
-      <select name="sort">
-        <option value="newest" <%= selectedSort === 'newest' ? 'selected' : '' %>>Newest</option>
-        <option value="price_asc" <%= selectedSort === 'price_asc' ? 'selected' : '' %>>Price low to high</option>
-        <option value="price_desc" <%= selectedSort === 'price_desc' ? 'selected' : '' %>>Price high to low</option>
-        <option value="title" <%= selectedSort === 'title' ? 'selected' : '' %>>Title</option>
-      </select>
-    </label>
-    <button class="btn btn-dark" type="submit">Apply</button>
-    <a href="/listings" class="btn btn-outline-dark">Reset</a>
-  </form>
-</section>
-
-<section
-  id="react-explore-root"
-  class="react-explore-root"
-  aria-label="Interactive listing controls"
-></section>
+<section id="react-listings-app" class="react-listings-app"></section>
 <script id="react-explore-data" type="application/json">
   <%- JSON.stringify(reactExploreData).replace(/</g, "\\u003c") %>
 </script>
 
-<div class="listings-summary">
-  <p class="mb-0">
-    <strong><%= allListings.length %></strong>
-    stay<%= allListings.length === 1 ? '' : 's' %>
-    <% if (selectedFilter !== 'trending') { %>
-    in <%= filters.find((item) => item.key === selectedFilter)?.label || selectedFilter %>
-    <% } %>
-    <% if (favoritesOnly) { %>
-    in favorites
-    <% } %>
-    <% if (searchQuery) { %>
-    for "<%= searchQuery %>"
-    <% } %>
-  </p>
-  <label class="tax-toggle" for="tax-toggle">
-    <span class="tax-toggle-copy">
-      <strong>Display total before taxes</strong>
-      <small>Adds 18% tax to the nightly price</small>
-    </span>
-    <span class="tax-toggle-switch">
-      <input type="checkbox" id="tax-toggle" />
-      <span class="tax-toggle-slider"></span>
-    </span>
-  </label>
-</div>
-
-<div id="listing-results" class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
-  <% for(let listing of allListings){%>
-  <div
-    class="col listing-result"
-    data-title="<%= listing.title %>"
-    data-location="<%= listing.location %>, <%= listing.country %>"
-    data-price="<%= listing.price || 0 %>"
-    data-favorite="<%= listing.isFavorite ? 'true' : 'false' %>"
-  >
-    <div class="card listing-card h-100">
-      <% if (currUser) { %>
-      <form method="POST" action="/listings/<%= listing._id %>/favorite" class="favorite-form">
-        <button
-          class="favorite-btn <%= listing.isFavorite ? 'is-favorite' : '' %>"
-          type="submit"
-          aria-label="<%= listing.isFavorite ? 'Remove from favorites' : 'Save to favorites' %>"
-        >
-          <i class="<%= listing.isFavorite ? 'fa-solid' : 'fa-regular' %> fa-heart"></i>
-        </button>
-      </form>
-      <% } %>
-      <a href="/listings/<%=listing._id %>" class="listing-link">
-      <img
-        src="<%= listing.image && listing.image.url ? listing.image.url : 'https://via.placeholder.com/300' %>"
-        class="card-img-top"
-        alt="<%= listing.title %>"
-      />
-      <div class="card-img-overlay"></div>
-      <div class="card-body">
-        <p class="card-text listing-card-copy">
-          <span class="listing-card-title"><%= listing.title %></span>
-          <% if (listing.averageRating) { %>
-          <span class="listing-rating"><i class="fa-solid fa-star"></i> <%= listing.averageRating %></span>
-          <% } %>
-          <br />
-          <span class="listing-meta"><%= listing.location %>, <%= listing.country %></span><br />
-          <span class="listing-meta"><%= listing.guests || 2 %> guests · <%= listing.bedrooms || 1 %> beds · <%= listing.bathrooms || 1 %> baths</span><br />
-          <% if (listing.price != null) { %>
-          <span
-            class="listing-price"
-            data-base-price="<%= listing.price %>"
-            data-tax-price="<%= Math.round(listing.price * 1.18) %>"
-          >
-            &#8377;<%= listing.price.toLocaleString("en-IN") %>
-          </span>
-          <span class="listing-price-suffix">/night</span>
-          <% } else { %>
-          Price on request
-          <% } %>
-        </p>
+<div class="legacy-listing-shell">
+  <section class="filters-shell">
+    <div class="filters-header">
+      <div>
+        <p class="filters-kicker mb-1">Discover stays</p>
+        <h3 class="filters-title mb-0">Browse listings</h3>
+        <p class="filters-subtitle mb-0">Filter by experience, price, and availability.</p>
       </div>
-      </a>
+      <form action="/listings" method="GET" class="search-bar">
+        <% if (selectedFilter !== 'trending') { %>
+        <input type="hidden" name="filter" value="<%= selectedFilter %>" />
+        <% } %>
+        <% if (favoritesOnly) { %>
+        <input type="hidden" name="favorites" value="true" />
+        <% } %>
+        <% if (myListingsOnly) { %>
+        <input type="hidden" name="myListings" value="true" />
+        <% } %>
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" name="q" class="search-input" placeholder="Search title, place, or country" value="<%= searchQuery || '' %>" />
+        <% if (searchQuery) { %>
+        <a href="/listings?<%= selectedFilter === 'trending' ? '' : `filter=${selectedFilter}` %>" class="search-clear">Clear</a>
+        <% } %>
+      </form>
     </div>
+
+    <div class="filters-row">
+      <% for (let filter of filters) { %>
+      <a
+        href="/listings?<%= new URLSearchParams({
+          ...(filter.key === 'trending' ? {} : { filter: filter.key }),
+          ...(searchQuery ? { q: searchQuery } : {}),
+          ...(favoritesOnly ? { favorites: 'true' } : {}),
+          ...(myListingsOnly ? { myListings: 'true' } : {})
+        }).toString() %>"
+        class="filter-chip <%= selectedFilter === filter.key ? 'active' : '' %>"
+        aria-current="<%= selectedFilter === filter.key ? 'page' : 'false' %>"
+      >
+        <i class="<%= filter.icon %>"></i>
+        <span><%= filter.label %></span>
+      </a>
+      <% } %>
+    </div>
+
+    <form action="/listings" method="GET" class="advanced-filters">
+      <% if (selectedFilter !== 'trending') { %>
+      <input type="hidden" name="filter" value="<%= selectedFilter %>" />
+      <% } %>
+      <% if (searchQuery) { %>
+      <input type="hidden" name="q" value="<%= searchQuery %>" />
+      <% } %>
+      <% if (favoritesOnly) { %>
+      <input type="hidden" name="favorites" value="true" />
+      <% } %>
+      <% if (myListingsOnly) { %>
+      <input type="hidden" name="myListings" value="true" />
+      <% } %>
+      <label>
+        <span>Min price</span>
+        <input type="number" name="minPrice" min="0" value="<%= minPrice %>" placeholder="0" />
+      </label>
+      <label>
+        <span>Max price</span>
+        <input type="number" name="maxPrice" min="0" value="<%= maxPrice %>" placeholder="10000" />
+      </label>
+      <label>
+        <span>Guests</span>
+        <input type="number" name="guests" min="1" value="<%= selectedGuests %>" placeholder="2" />
+      </label>
+      <label>
+        <span>Sort</span>
+        <select name="sort">
+          <option value="newest" <%= selectedSort === 'newest' ? 'selected' : '' %>>Newest</option>
+          <option value="price_asc" <%= selectedSort === 'price_asc' ? 'selected' : '' %>>Price low to high</option>
+          <option value="price_desc" <%= selectedSort === 'price_desc' ? 'selected' : '' %>>Price high to low</option>
+          <option value="title" <%= selectedSort === 'title' ? 'selected' : '' %>>Title</option>
+        </select>
+      </label>
+      <% if (currUser) { %>
+      <label>
+        <span>My listings</span>
+        <input type="checkbox" name="myListings" value="true" <%= myListingsOnly ? 'checked' : '' %> style="width: auto; margin-left: 0.5rem;" />
+      </label>
+      <% } %>
+      <button class="btn btn-dark" type="submit">Apply</button>
+      <a href="/listings" class="btn btn-outline-dark">Reset</a>
+    </form>
+  </section>
+
+  <section id="react-explore-root" class="react-explore-root" aria-label="Interactive listing controls"></section>
+
+  <div class="listings-summary">
+    <p class="mb-0">
+      <strong><%= allListings.length %></strong>
+      stay<%= allListings.length === 1 ? '' : 's' %>
+      <% if (selectedFilter !== 'trending') { %>
+      in <%= filters.find((item) => item.key === selectedFilter)?.label || selectedFilter %>
+      <% } %>
+      <% if (favoritesOnly) { %>
+      in favorites
+      <% } %>
+      <% if (searchQuery) { %>
+      for "<%= searchQuery %>"
+      <% } %>
+    </p>
+    <label class="tax-toggle" for="tax-toggle">
+      <span class="tax-toggle-copy">
+        <strong>Display total before taxes</strong>
+        <small>Adds 18% tax to the nightly price</small>
+      </span>
+      <span class="tax-toggle-switch">
+        <input type="checkbox" id="tax-toggle" />
+        <span class="tax-toggle-slider"></span>
+      </span>
+    </label>
   </div>
+
+  <div id="listing-results" class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
+    <% for(let listing of allListings){%>
+    <div
+      class="col listing-result"
+      data-title="<%= listing.title %>"
+      data-location="<%= listing.location %>, <%= listing.country %>"
+      data-price="<%= listing.price || 0 %>"
+      data-favorite="<%= listing.isFavorite ? 'true' : 'false' %>"
+    >
+      <div class="card listing-card h-100">
+        <% if (currUser) { %>
+        <form method="POST" action="/listings/<%= listing._id %>/favorite" class="favorite-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="favorite-btn <%= listing.isFavorite ? 'is-favorite' : '' %>" type="submit" aria-label="<%= listing.isFavorite ? 'Remove from favorites' : 'Save to favorites' %>">
+            <i class="<%= listing.isFavorite ? 'fa-solid' : 'fa-regular' %> fa-heart"></i>
+          </button>
+        </form>
+        <% } %>
+        <a href="/listings/<%=listing._id %>" class="listing-link">
+          <div class="card-img-wrapper">
+            <img src="<%= listing.image && listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80' %>" class="card-img-top" alt="<%= listing.title %>" />
+            <div class="card-img-overlay"></div>
+          </div>
+          <div class="card-body">
+            <p class="card-text listing-card-copy">
+              <span class="listing-card-title"><%= listing.title %></span>
+              <% if (listing.averageRating) { %>
+              <span class="listing-rating"><i class="fa-solid fa-star"></i> <%= listing.averageRating %></span>
+              <% } %>
+              <br />
+              <span class="listing-meta"><%= listing.location %>, <%= listing.country %></span><br />
+              <span class="listing-meta"><%= listing.guests || 2 %> guests · <%= listing.bedrooms || 1 %> beds · <%= listing.bathrooms || 1 %> baths</span><br />
+              <% if (listing.price != null) { %>
+              <span class="listing-price" data-base-price="<%= listing.price %>" data-tax-price="<%= Math.round(listing.price * 1.18) %>">
+                &#8377;<%= listing.price.toLocaleString("en-IN") %>
+              </span>
+              <span class="listing-price-suffix">/night</span>
+              <% } else { %>
+              Price on request
+              <% } %>
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <% } %>
+  </div>
+
+  <% if (allListings.length === 0) { %>
+  <section class="empty-state">
+    <p class="empty-state-eyebrow">No matches</p>
+    <h4>No listings found for the current search or filter.</h4>
+    <a href="/listings" class="btn btn-dark mt-2">Clear filters</a>
+  </section>
   <% } %>
 </div>
-
-<% if (allListings.length === 0) { %>
-<section class="empty-state">
-  <p class="empty-state-eyebrow">No matches</p>
-  <h4>No listings found for the current search or filter.</h4>
-  <a href="/listings" class="btn btn-dark mt-2">Clear filters</a>
-</section>
-<% } %>

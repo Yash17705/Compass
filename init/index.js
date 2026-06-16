@@ -36,7 +36,7 @@ const geocodeListing = async (listing) => {
         "User-Agent": "Compass/1.0 (seed geocoder)",
         Accept: "application/json",
       },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -65,7 +65,7 @@ const initDB = async () => {
     seedOwner ||
     (await User.register(
       new User({ username: "yash", email: "yash@example.com" }),
-      "helloworld"
+      "helloworld",
     ));
 
   const listingsWithOwner = initData.data.map((obj) => ({
@@ -73,7 +73,7 @@ const initDB = async () => {
     owner: owner._id,
   }));
   const listingsWithGeometry = await Promise.all(
-    listingsWithOwner.map(geocodeListing)
+    listingsWithOwner.map(geocodeListing),
   );
   await Listing.insertMany(listingsWithGeometry);
   console.log(`data was initialized with owner @${owner.username}`);

@@ -1,10 +1,10 @@
 (() => {
-  'use strict'
+  "use strict";
 
-  const tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const tileLayerUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
   const tileLayerOptions = {
     maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors',
+    attribution: "&copy; OpenStreetMap contributors",
   };
 
   const createMap = (element, lat, lng, zoom = 12) => {
@@ -18,9 +18,9 @@
     return map;
   };
 
-  const listingMapElement = document.getElementById('listing-map');
+  const listingMapElement = document.getElementById("listing-map");
 
-  if (listingMapElement && typeof L !== 'undefined') {
+  if (listingMapElement && typeof L !== "undefined") {
     const lng = Number(listingMapElement.dataset.lng);
     const lat = Number(listingMapElement.dataset.lat);
     const title = listingMapElement.dataset.title;
@@ -34,17 +34,21 @@
     }
   }
 
-  const locationCheckButton = document.querySelector('.location-check-btn');
+  const locationCheckButton = document.querySelector(".location-check-btn");
 
-  if (locationCheckButton && typeof L !== 'undefined') {
+  if (locationCheckButton && typeof L !== "undefined") {
     const mapTargetId = locationCheckButton.dataset.mapTarget;
-    const locationInput = document.getElementById(locationCheckButton.dataset.locationInput);
-    const countryInput = document.getElementById(locationCheckButton.dataset.countryInput);
+    const locationInput = document.getElementById(
+      locationCheckButton.dataset.locationInput,
+    );
+    const countryInput = document.getElementById(
+      locationCheckButton.dataset.countryInput,
+    );
     const mapElement = document.getElementById(mapTargetId);
     const mapStatus = document.getElementById(`${mapTargetId}-status`);
 
     const renderPreview = (lat, lng, label) => {
-      mapElement.classList.remove('d-none');
+      mapElement.classList.remove("d-none");
       const map = createMap(mapElement, lat, lng, 13);
       L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
       mapStatus.textContent = label;
@@ -54,63 +58,68 @@
     const initialLat = Number(locationCheckButton.dataset.initialLat);
     const initialLabel = locationCheckButton.dataset.initialLabel;
 
-    if (Number.isFinite(initialLng) && Number.isFinite(initialLat) && initialLabel) {
+    if (
+      Number.isFinite(initialLng) &&
+      Number.isFinite(initialLat) &&
+      initialLabel
+    ) {
       renderPreview(initialLat, initialLng, initialLabel);
     }
 
-    locationCheckButton.addEventListener('click', async () => {
+    locationCheckButton.addEventListener("click", async () => {
       const location = locationInput?.value.trim();
       const country = countryInput?.value.trim();
-      const query = [location, country].filter(Boolean).join(', ');
+      const query = [location, country].filter(Boolean).join(", ");
 
       if (!query) {
-        mapStatus.textContent = 'Enter a location and country first.';
+        mapStatus.textContent = "Enter a location and country first.";
         return;
       }
 
-      mapStatus.textContent = 'Checking location...';
+      mapStatus.textContent = "Checking location...";
 
       try {
         const searchParams = new URLSearchParams({
           q: query,
-          format: 'jsonv2',
-          limit: '1',
+          format: "jsonv2",
+          limit: "1",
         });
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?${searchParams.toString()}`,
           {
             headers: {
-              Accept: 'application/json',
+              Accept: "application/json",
             },
-          }
+          },
         );
 
         if (!response.ok) {
-          throw new Error('Location lookup failed');
+          throw new Error("Location lookup failed");
         }
 
         const results = await response.json();
         const match = results[0];
 
         if (!match) {
-          mapElement.classList.add('d-none');
-          mapStatus.textContent = 'No matching place found. Try a more specific location.';
+          mapElement.classList.add("d-none");
+          mapStatus.textContent =
+            "No matching place found. Try a more specific location.";
           return;
         }
 
         renderPreview(Number(match.lat), Number(match.lon), match.display_name);
       } catch (error) {
-        mapElement.classList.add('d-none');
-        mapStatus.textContent = 'Unable to check this location right now.';
+        mapElement.classList.add("d-none");
+        mapStatus.textContent = "Unable to check this location right now.";
       }
     });
   }
 
-  const editImageInput = document.getElementById('editImageInput');
-  const editImagePreview = document.getElementById('editImagePreview');
+  const editImageInput = document.getElementById("editImageInput");
+  const editImagePreview = document.getElementById("editImagePreview");
 
   if (editImageInput && editImagePreview) {
-    editImageInput.addEventListener('change', () => {
+    editImageInput.addEventListener("change", () => {
       const [file] = editImageInput.files;
 
       if (!file) {
@@ -121,15 +130,15 @@
     });
   }
 
-  const taxToggle = document.getElementById('tax-toggle');
-  const listingPrices = document.querySelectorAll('.listing-price');
+  const taxToggle = document.getElementById("tax-toggle");
+  const listingPrices = document.querySelectorAll(".listing-price");
 
   if (taxToggle && listingPrices.length > 0) {
-    const formatPrice = value =>
-      `\u20b9${Number(value).toLocaleString('en-IN')}`;
+    const formatPrice = (value) =>
+      `\u20b9${Number(value).toLocaleString("en-IN")}`;
 
     const applyTaxDisplay = () => {
-      listingPrices.forEach(priceElement => {
+      listingPrices.forEach((priceElement) => {
         const basePrice = Number(priceElement.dataset.basePrice);
         const taxPrice = Number(priceElement.dataset.taxPrice);
 
@@ -139,48 +148,54 @@
       });
     };
 
-    taxToggle.addEventListener('change', applyTaxDisplay);
+    taxToggle.addEventListener("change", applyTaxDisplay);
     applyTaxDisplay();
   }
 
-  const forms = document.querySelectorAll('.needs-validation')
+  const forms = document.querySelectorAll(".needs-validation");
 
-  Array.from(forms).forEach(form => {
+  Array.from(forms).forEach((form) => {
     const trimRequiredTextFields = () => {
       const requiredFields = form.querySelectorAll(
-        'input[required][type="text"], input[required]:not([type]), textarea[required]'
+        'input[required][type="text"], input[required]:not([type]), textarea[required]',
       );
 
-      requiredFields.forEach(field => {
-        if (field.value.trim() === '') {
-          field.value = '';
-          field.setCustomValidity('This field is required');
+      requiredFields.forEach((field) => {
+        if (field.value.trim() === "") {
+          field.value = "";
+          field.setCustomValidity("This field is required");
         } else {
           field.value = field.value.trim();
-          field.setCustomValidity('');
+          field.setCustomValidity("");
         }
       });
     };
 
-    form.addEventListener('submit', event => {
-      trimRequiredTextFields();
+    form.addEventListener(
+      "submit",
+      (event) => {
+        trimRequiredTextFields();
 
-      if (!form.checkValidity()) {
-        event.preventDefault()
-        event.stopPropagation()
-      }
-
-      form.classList.add('was-validated')
-    }, false);
-
-    form.querySelectorAll('input[required], textarea[required]').forEach(field => {
-      field.addEventListener('input', () => {
-        if (field.value.trim() === '') {
-          field.setCustomValidity('This field is required');
-        } else {
-          field.setCustomValidity('');
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
         }
+
+        form.classList.add("was-validated");
+      },
+      false,
+    );
+
+    form
+      .querySelectorAll("input[required], textarea[required]")
+      .forEach((field) => {
+        field.addEventListener("input", () => {
+          if (field.value.trim() === "") {
+            field.setCustomValidity("This field is required");
+          } else {
+            field.setCustomValidity("");
+          }
+        });
       });
-    });
   });
 })();

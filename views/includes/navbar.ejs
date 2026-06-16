@@ -1,7 +1,15 @@
-<nav class="navbar navbar-expand-lg bg-body-light border-bottom sticky-top">
+<nav class="navbar navbar-expand-lg compass-navbar sticky-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/listings"><i class="fa-solid fa-compass"></i></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/listings">
+      <i class="fa-solid fa-compass"></i>
+      <span class="brand-mark">Compass</span>
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNavAltMarkup"
+    >
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
@@ -12,13 +20,14 @@
         <% } %>
       </div>
       <div class="navbar-nav ms-auto">
-        <a class="nav-link" href="/listings/new">Add Listing</a>
+        <a class="nav-link nav-cta" href="/listings/new">Add Listing</a>
         <% if(!currUser){%>
-        <a class="nav-link " aria-current="page" href="/signup"><b>
-            SignUp
-          </b></a>
+        <a class="nav-link" aria-current="page" href="/signup"
+          ><b> SignUp </b></a
+        >
         <a class="nav-link" href="/login"><b>Login</b></a>
-        <%} %> <% if(currUser){ %>
+        <%} %>
+        <% if(currUser){ %>
         <a class="nav-link" href="/logout"><b>Log Out</b></a>
         <%}%>
       </div>

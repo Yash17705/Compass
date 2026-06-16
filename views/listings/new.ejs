@@ -4,7 +4,14 @@
     <br /><br />
     <p class="filters-kicker mb-1">Host dashboard</p>
     <h3>Create a new listing</h3>
-    <form method="POST" action="/listings" class="needs-validation" novalidate enctype="multipart/form-data">
+    <form
+      method="POST"
+      action="/listings"
+      class="needs-validation"
+      novalidate
+      enctype="multipart/form-data"
+    >
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
       <div class="mb-3">
         <label for="title" class="form-label">Title</label>
         <input
@@ -18,8 +25,14 @@
       <div class="row">
         <div class="mb-3 col-md-4">
           <label for="category" class="form-label">Category</label>
-          <select id="category" name="listing[category]" class="form-select" required>
-            <% for (let filter of filters.filter((item) => item.key !== 'trending')) { %>
+          <select
+            id="category"
+            name="listing[category]"
+            class="form-select"
+            required
+          >
+            <% for (let filter of filters.filter((item) => item.key !==
+            'trending')) { %>
             <option value="<%= filter.key %>"><%= filter.label %></option>
             <% } %>
           </select>
@@ -29,7 +42,11 @@
           <div class="amenity-grid">
             <% for (let amenity of amenities) { %>
             <label class="amenity-choice">
-              <input type="checkbox" name="listing[amenities]" value="<%= amenity %>" />
+              <input
+                type="checkbox"
+                name="listing[amenities]"
+                value="<%= amenity %>"
+              />
               <span><%= amenity %></span>
             </label>
             <% } %>
@@ -70,17 +87,41 @@
         </div>
         <div class="mb-3 col-md-4">
           <label for="guests" class="form-label">Guests</label>
-          <input id="guests" name="listing[guests]" type="number" min="1" value="2" class="form-control" required />
+          <input
+            id="guests"
+            name="listing[guests]"
+            type="number"
+            min="1"
+            value="2"
+            class="form-control"
+            required
+          />
         </div>
         <div class="mb-3 col-md-4">
           <label for="bedrooms" class="form-label">Bedrooms</label>
-          <input id="bedrooms" name="listing[bedrooms]" type="number" min="0" value="1" class="form-control" required />
+          <input
+            id="bedrooms"
+            name="listing[bedrooms]"
+            type="number"
+            min="0"
+            value="1"
+            class="form-control"
+            required
+          />
         </div>
       </div>
       <div class="row">
         <div class="mb-3 col-md-4">
           <label for="bathrooms" class="form-label">Bathrooms</label>
-          <input id="bathrooms" name="listing[bathrooms]" type="number" min="0" value="1" class="form-control" required />
+          <input
+            id="bathrooms"
+            name="listing[bathrooms]"
+            type="number"
+            min="0"
+            value="1"
+            class="form-control"
+            required
+          />
         </div>
         <div class="mb-3 col-md-8">
           <label for="country" class="form-label">Country</label>
@@ -120,7 +161,10 @@
       </div>
       <div class="mb-3">
         <div id="listing-form-map" class="listing-map d-none"></div>
-        <p id="listing-form-map-status" class="location-status text-muted mt-2 mb-0"></p>
+        <p
+          id="listing-form-map-status"
+          class="location-status text-muted mt-2 mb-0"
+        ></p>
       </div>
       <button type="submit" class="btn btn-dark add-btn mt-3">Add</button>
       <br /><br />

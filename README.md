@@ -27,6 +27,7 @@ The project is functional and includes:
 
 - Search by title, description, location, or country
 - Airbnb-style filter chips such as beach, mountains, cabins, villas, city, luxury, and pools
+- Fully dynamic React-powered browsing experience with instant filtering, sorting, and list/grid views
 - Client-side tax toggle for displaying nightly price with 18% tax
 
 ### Reviews
