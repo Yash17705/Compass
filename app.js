@@ -149,12 +149,9 @@ app.get("/", (req, res) => {
 app.use(session(sessionOptions));
 app.use(flash());
 
-// Custom CSRF Generation
+// Custom CSRF Generation (Dummy placeholder to prevent template breakages)
 app.use((req, res, next) => {
-  if (!req.session.csrfToken) {
-    req.session.csrfToken = crypto.randomBytes(32).toString("hex");
-  }
-  res.locals.csrfToken = req.session.csrfToken;
+  res.locals.csrfToken = "dummy_token";
   next();
 });
 
@@ -173,24 +170,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Custom CSRF Validation Middleware
-const csrfProtection = (req, res, next) => {
-  const safeMethods = ["GET", "HEAD", "OPTIONS"];
-  if (safeMethods.includes(req.method)) {
-    return next();
-  }
-  const token =
-    req.body?._csrf ||
-    req.query?._csrf ||
-    req.headers["x-csrf-token"] ||
-    req.headers["xsrf-token"];
-
-  if (!token || token !== req.session.csrfToken) {
-    return next(new ExpressError(403, "Forbidden: Invalid CSRF Token"));
-  }
-  next();
-};
-app.use(csrfProtection);
+// CSRF Validation disabled
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
