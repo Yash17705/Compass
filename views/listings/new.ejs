@@ -6,7 +6,7 @@
     <h3>Create a new listing</h3>
     <form
       method="POST"
-      action="/listings"
+      action="/listings?_csrf=<%= csrfToken %>"
       class="needs-validation"
       novalidate
       enctype="multipart/form-data"

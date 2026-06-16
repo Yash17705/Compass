@@ -180,7 +180,10 @@ const csrfProtection = (req, res, next) => {
     return next();
   }
   const token =
-    req.body?._csrf || req.headers["x-csrf-token"] || req.headers["xsrf-token"];
+    req.body?._csrf ||
+    req.query?._csrf ||
+    req.headers["x-csrf-token"] ||
+    req.headers["xsrf-token"];
 
   if (!token || token !== req.session.csrfToken) {
     return next(new ExpressError(403, "Forbidden: Invalid CSRF Token"));

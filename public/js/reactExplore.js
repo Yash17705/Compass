@@ -211,7 +211,7 @@
         .querySelector('meta[name="csrf-token"]')
         ?.getAttribute("content");
       try {
-        const response = await fetch(`/listings/${listingId}/favorite`, {
+        const response = await fetch(`/listings/${listingId}/favorite?_csrf=${encodeURIComponent(csrfToken || "")}`, {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -526,7 +526,7 @@
         .querySelector('meta[name="csrf-token"]')
         ?.getAttribute("content");
       try {
-        const response = await fetch(`/listings/${data.id}/favorite`, {
+        const response = await fetch(`/listings/${data.id}/favorite?_csrf=${encodeURIComponent(csrfToken || "")}`, {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -557,7 +557,7 @@
         .querySelector('meta[name="csrf-token"]')
         ?.getAttribute("content");
       try {
-        const response = await fetch(`/listings/${data.id}/reviews`, {
+        const response = await fetch(`/listings/${data.id}/reviews?_csrf=${encodeURIComponent(csrfToken || "")}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -595,7 +595,7 @@
         ?.getAttribute("content");
       try {
         const response = await fetch(
-          `/listings/${data.id}/reviews/${reviewId}?_method=DELETE`,
+          `/listings/${data.id}/reviews/${reviewId}?_method=DELETE&_csrf=${encodeURIComponent(csrfToken || "")}`,
           {
             method: "POST",
             headers: {
@@ -779,7 +779,11 @@
             "form",
             {
               method: "post",
-              action: `/listings/${data.id}?_method=DELETE`,
+              action: `/listings/${data.id}?_method=DELETE&_csrf=${encodeURIComponent(
+                document
+                  .querySelector('meta[name="csrf-token"]')
+                  ?.getAttribute("content") || "",
+              )}`,
               onSubmit: (e) => {
                 if (!confirm("Are you sure you want to delete this listing?")) {
                   e.preventDefault();

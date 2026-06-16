@@ -110,7 +110,7 @@
         >Edit</a
       >
 
-      <form method="post" action="/listings/<%=listing._id%>?_method=DELETE">
+      <form method="post" action="/listings/<%=listing._id%>?_method=DELETE&_csrf=<%= csrfToken %>">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <button class="btn btn-outline-danger">Delete</button>
       </form>
@@ -214,7 +214,7 @@
             <form
               class="mb-3"
               method="POST"
-              action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+              action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE&_csrf=<%= csrfToken %>"
             >
               <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
               <button class="btn btn-sm btn-dark">Delete</button>
